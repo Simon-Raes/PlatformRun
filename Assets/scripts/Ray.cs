@@ -8,7 +8,6 @@ public class Ray : MonoBehaviour
     Vector3 movement;
     const float skinWidth = .015f;
 
-
     public float jumpSpeed = .1f;
     public float moveSpeed = 5;
     public float gravity = -20;
@@ -18,8 +17,12 @@ public class Ray : MonoBehaviour
     private Renderer rend;
 
     private bool grounded;
+    private bool jumping;
     private bool bumpedHead;
     private bool leftWallSlide, rightWallSlide;
+
+    private const float WALL_STICK_TIME = .25f;
+    private float timeOnWall;
 
     void Start()
     {
@@ -34,106 +37,74 @@ public class Ray : MonoBehaviour
             movement.y = 0;
         }
 
-        // ResetCollisions();
-
         RegisterInputs();
-
-        // CheckForWallSlideLeft();
-        // CheckForWallSlideRight();
 
         AttemptMove(movement * Time.deltaTime);
 
         SetPlayerDebugColor();
     }
 
-    private void ResetCollisions()
-    {
-        leftWallSlide = false;
-        rightWallSlide = false;
-        grounded = false;
-        bumpedHead = false;
-    }
+    // private void ResetCollisions()
+    // {
+    //     leftWallSlide = false;
+    //     rightWallSlide = false;
+    //     grounded = false;
+    //     bumpedHead = false;
+    // }
 
     private void RegisterInputs()
     {
-        Vector2 input = new Vector2(Input.GetAxisRaw("Horizontal"), Input.GetAxisRaw("Vertical"));
+        RegisterVerticalInputs();
+        RegisterHorizontalInputs();
+    }
 
-        movement.x = input.x * moveSpeed;
-
+    private void RegisterVerticalInputs()
+    {
         // Jump
         if (Input.GetKeyDown(KeyCode.Space) && (grounded || leftWallSlide || rightWallSlide))
         {
+            jumping = true;
             movement.y = jumpSpeed;
         }
 
         movement.y += gravity * Time.deltaTime;
     }
 
-    private void CheckForWallSlideLeft()
+    private void RegisterHorizontalInputs()
     {
-        float rayLength = skinWidth + .01f;
+        Vector2 input = new Vector2(Input.GetAxisRaw("Horizontal"), Input.GetAxisRaw("Vertical"));
 
-        Vector2 origin = raycastOrigins.bottomLeft;
-        RaycastHit2D hit = Physics2D.Raycast(origin, Vector2.left, rayLength, collisionMask);
-
-        if(!hit){
-            origin = raycastOrigins.topLeft;
-            hit = Physics2D.Raycast(origin, Vector2.left, rayLength, collisionMask);
-        }
-
-        if (hit && !grounded && hit.distance <= rayLength)
+        // Don't allow horizontal movement if we're still stuck on a wall
+        // TODO special x/y velocity when jumping while on a wall
+        if (jumping || !IsStuckOnWall(input.x))
         {
-            leftWallSlide = true;
+            movement.x = input.x * moveSpeed;
         }
-		else
-		{
-			leftWallSlide = false;
-		}
     }
 
-    private void CheckForWallSlideRight()
+    private bool IsStuckOnWall(float xInput)
     {
-        float rayLength = skinWidth + .01f;
+        float inputDirection = Mathf.Sign(xInput);
+        float requiredPushDirection = leftWallSlide ? 1 : rightWallSlide ? -1 : 0;
 
-        Vector2 origin = raycastOrigins.bottomRight;
-        RaycastHit2D hit = Physics2D.Raycast(origin, Vector2.right, rayLength, collisionMask);
-
-        if(!hit){
-            origin = raycastOrigins.topRight;
-            hit =Physics2D.Raycast(origin, Vector2.right, rayLength, collisionMask);
+        if(requiredPushDirection == 0)
+        {
+            // Not even wallsliding, not stuck
+            return false;
         }
 
-        if (hit && !grounded && hit.distance <= rayLength)
+        if (inputDirection == requiredPushDirection)
         {
-            rightWallSlide = true;
-        }
-		else{
-			rightWallSlide = false;
-		}
-    }
-
-    void SetPlayerDebugColor()
-    {
-        if (leftWallSlide)
-        {
-            rend.material.color = Color.blue;
-        }
-        else if (rightWallSlide)
-        {
-            rend.material.color = Color.green;
+            // Pushing away from the wall, count down to unsticking
+            timeOnWall += Time.deltaTime;
         }
         else
         {
-            if (grounded)
-            {
-                rend.material.color = Color.red;
-            }
-            else
-            {
-                rend.material.color = Color.cyan;
-            }
+            // Not pushing away, reset unstick timer.
+            timeOnWall = 0;
         }
 
+        return timeOnWall < WALL_STICK_TIME;
     }
 
     void AttemptMove(Vector3 movement)
@@ -144,9 +115,9 @@ public class Ray : MonoBehaviour
         CheckVerticalCollisions(ref movement);
         CheckHorizontalCollisions(ref movement);
 
-	CheckForWallSlideLeft();
+        CheckForWallSlideLeft();
         CheckForWallSlideRight();
-		
+
         transform.Translate(movement);
     }
 
@@ -180,6 +151,8 @@ public class Ray : MonoBehaviour
         {
             movement.y = (hit.distance - skinWidth) * direction;
 
+            jumping = false;
+
             if (direction < 0)
             {
                 grounded = true;
@@ -189,10 +162,11 @@ public class Ray : MonoBehaviour
                 bumpedHead = true;
             }
         }
-		else{
-			grounded = false;
-			bumpedHead = false;
-		}
+        else
+        {
+            grounded = false;
+            bumpedHead = false;
+        }
     }
 
     private void CheckHorizontalCollisions(ref Vector3 movement)
@@ -214,6 +188,8 @@ public class Ray : MonoBehaviour
         {
             movement.x = (hit.distance - skinWidth) * direction;
 
+            jumping = false;
+
             // Can't wallslide if we're on the floor
             if (!grounded)
             {
@@ -226,18 +202,93 @@ public class Ray : MonoBehaviour
                     rightWallSlide = true;
                 }
             }
-			else{
-				leftWallSlide = false;
-				rightWallSlide = false;
-			}
+            else
+            {
+                leftWallSlide = false;
+                rightWallSlide = false;
+            }
         }
-		else{
-			leftWallSlide = false;
-			rightWallSlide = false;
-		}
+        else
+        {
+            leftWallSlide = false;
+            rightWallSlide = false;
+        }
     }
 
 
+    private void CheckForWallSlideLeft()
+    {
+        float rayLength = skinWidth + .01f;
+
+        Vector2 origin = raycastOrigins.bottomLeft;
+        RaycastHit2D hit = Physics2D.Raycast(origin, Vector2.left, rayLength, collisionMask);
+
+        if (!hit)
+        {
+            origin = raycastOrigins.topLeft;
+            hit = Physics2D.Raycast(origin, Vector2.left, rayLength, collisionMask);
+        }
+
+        if (hit && !grounded && hit.distance <= rayLength)
+        {
+            leftWallSlide = true;
+        }
+        else
+        {
+            leftWallSlide = false;
+        }
+    }
+
+    private void CheckForWallSlideRight()
+    {
+        float rayLength = skinWidth + .01f;
+
+        Vector2 origin = raycastOrigins.bottomRight;
+        RaycastHit2D hit = Physics2D.Raycast(origin, Vector2.right, rayLength, collisionMask);
+
+        if (!hit)
+        {
+            origin = raycastOrigins.topRight;
+            hit = Physics2D.Raycast(origin, Vector2.right, rayLength, collisionMask);
+        }
+
+        if (hit && !grounded && hit.distance <= rayLength)
+        {
+            rightWallSlide = true;
+        }
+        else
+        {
+            rightWallSlide = false;
+        }
+    }
+
+
+    
+
+
+    void SetPlayerDebugColor()
+    {
+        if (leftWallSlide)
+        {
+            rend.material.color = Color.blue;
+        }
+        else if (rightWallSlide)
+        {
+            rend.material.color = Color.green;
+        }
+        else
+        {
+            if (grounded)
+            {
+                rend.material.color = Color.red;
+            }
+            else
+            {
+                rend.material.color = Color.cyan;
+            }
+        }
+
+    }
 
     private void CapAtTerminalVelocity(ref Vector3 movement)
     {
