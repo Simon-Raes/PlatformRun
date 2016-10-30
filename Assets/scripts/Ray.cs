@@ -71,12 +71,17 @@ public class Ray : MonoBehaviour
 
     private void CheckForWallSlideLeft()
     {
-        float rayLength = .1f;
+        float rayLength = skinWidth + .01f;
 
         Vector2 origin = raycastOrigins.bottomLeft;
         RaycastHit2D hit = Physics2D.Raycast(origin, Vector2.left, rayLength, collisionMask);
 
-        if (hit && !grounded && hit.distance < .1f)
+        if(!hit){
+            origin = raycastOrigins.topLeft;
+            hit = Physics2D.Raycast(origin, Vector2.left, rayLength, collisionMask);
+        }
+
+        if (hit && !grounded && hit.distance <= rayLength)
         {
             leftWallSlide = true;
         }
@@ -88,12 +93,17 @@ public class Ray : MonoBehaviour
 
     private void CheckForWallSlideRight()
     {
-        float rayLength = .1f;
+        float rayLength = skinWidth + .01f;
 
         Vector2 origin = raycastOrigins.bottomRight;
         RaycastHit2D hit = Physics2D.Raycast(origin, Vector2.right, rayLength, collisionMask);
 
-        if (hit && !grounded && hit.distance < .1f)
+        if(!hit){
+            origin = raycastOrigins.topRight;
+            hit =Physics2D.Raycast(origin, Vector2.right, rayLength, collisionMask);
+        }
+
+        if (hit && !grounded && hit.distance <= rayLength)
         {
             rightWallSlide = true;
         }
@@ -132,9 +142,6 @@ public class Ray : MonoBehaviour
 
         // CapAtTerminalVelocity(ref movement);
         CheckVerticalCollisions(ref movement);
-
-	
-
         CheckHorizontalCollisions(ref movement);
 
 	CheckForWallSlideLeft();
