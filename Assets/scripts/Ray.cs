@@ -41,10 +41,11 @@ public class Ray : MonoBehaviour
             movement.y = 0;
         }
 
-        if (leftWallSlide || rightWallSlide)
-        {
-            movement.x = 0;
-        }
+        // if (leftWallSlide || rightWallSlide)
+        // {
+        //     print ("set movement to 0 because of wall slide");
+        //     movement.x = 0;
+        // }
 
         RegisterInputs();
 
@@ -74,6 +75,19 @@ public class Ray : MonoBehaviour
         {
             jumping = true;
             movement.y = jumpSpeed;
+
+            print("--------------------------jumping!!----------------------------");
+
+            if (leftWallSlide)
+            {
+                leftWallSlide = false;
+                movement.x = 3 * moveSpeed;
+            }
+            else if (rightWallSlide)
+            {
+                rightWallSlide = false;
+                movement.x = -3 * moveSpeed;
+            }
         }
 
         movement.y += gravity * Time.deltaTime;
@@ -117,17 +131,22 @@ public class Ray : MonoBehaviour
 
         if (!stuckOnWall)
         {
-            movement.x = input.x * moveSpeed;
-        }
-        else
-        {
-            print("stuck on wall");
+            // movement.x = input.x * moveSpeed;
+            print("lerping from " + movement.x + " to " + input.x * moveSpeed);
+
+            float targetVelocityX = input.x * moveSpeed;
+            movement.x = Mathf.SmoothDamp(movement.x, targetVelocityX, ref velocityXSmoothing, grounded ? accelerationTimeGrounded : accelerationTimeAirborne);
+            print("result " + movement.x);
         }
     }
 
     private bool IsStuckOnWall(float xInput)
     {
-        if (jumping || (!leftWallSlide && !rightWallSlide)) return false;
+        if (jumping || (!leftWallSlide && !rightWallSlide))
+        {
+            timeOnWall = 0;
+            return false;
+        }
 
         float inputDirection = Mathf.Sign(xInput);
         float requiredPushDirection = leftWallSlide ? 1 : rightWallSlide ? -1 : 0;
@@ -135,6 +154,7 @@ public class Ray : MonoBehaviour
         if (xInput == 0)
         {
             timeOnWall = 0;
+            return false;
         }
 
         if (inputDirection == requiredPushDirection)
@@ -164,6 +184,12 @@ public class Ray : MonoBehaviour
         CheckForWallSlideRight();
 
         transform.Translate(movement);
+
+        if (leftWallSlide || rightWallSlide)
+        {
+            print ("set movement to 0 because of wall slide");
+            movement.x = 0;
+        }
     }
 
     void UpdateRaycastOrigins()
@@ -231,7 +257,9 @@ public class Ray : MonoBehaviour
 
         if (hit)
         {
+            print("--------------------------wall hit!!----------------------------");
             movement.x = (hit.distance - skinWidth) * direction;
+            print("set movement to " + movement.x + " because of wall hit");
 
             jumping = false;
 
@@ -274,13 +302,21 @@ public class Ray : MonoBehaviour
             hit = Physics2D.Raycast(origin, Vector2.left, rayLength, collisionMask);
         }
 
+        if(movement.x > 0 && hit.distance > 0)
+        {
+            leftWallSlide = false;
+            return;
+        }
+
         if (hit && !grounded && hit.distance <= rayLength)
         {
+            print("found wall slide left!");
             leftWallSlide = true;
             jumping = false;
         }
         else
         {
+            print("nah we ain't sliding left!");
             leftWallSlide = false;
         }
     }
@@ -298,13 +334,21 @@ public class Ray : MonoBehaviour
             hit = Physics2D.Raycast(origin, Vector2.right, rayLength, collisionMask);
         }
 
+        if(movement.x < 0 && hit.distance > 0)
+        {
+            rightWallSlide = false;
+            return;
+        }
+
         if (hit && !grounded && hit.distance <= rayLength)
         {
+            print("found wall slide right!");
             rightWallSlide = true;
             jumping = false;
         }
         else
         {
+            print("nah we ain't sliding right!");
             rightWallSlide = false;
         }
     }
