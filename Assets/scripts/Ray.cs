@@ -8,10 +8,14 @@ public class Ray : MonoBehaviour
     Vector3 movement;
     const float skinWidth = .015f;
 
+    float velocityXSmoothing;
+
     public float jumpSpeed = .1f;
     public float moveSpeed = 5;
     public float gravity = -20;
     public float terminalVelocity = -10;
+    float accelerationTimeAirborne = .2f;
+    float accelerationTimeGrounded = .1f;
 
     private BoxCollider2D boxCollider;
     private Renderer rend;
@@ -35,6 +39,11 @@ public class Ray : MonoBehaviour
         if (grounded || bumpedHead)
         {
             movement.y = 0;
+        }
+
+        if (leftWallSlide || rightWallSlide)
+        {
+            movement.x = 0;
         }
 
         RegisterInputs();
@@ -74,23 +83,58 @@ public class Ray : MonoBehaviour
     {
         Vector2 input = new Vector2(Input.GetAxisRaw("Horizontal"), Input.GetAxisRaw("Vertical"));
 
-        // Don't allow horizontal movement if we're still stuck on a wall
-        // TODO special x/y velocity when jumping while on a wall
-        if (jumping || !IsStuckOnWall(input.x))
+        // TODO special x/y velocity when jumping off a wall
+
+        bool stuckOnWall = IsStuckOnWall(input.x);
+
+        // if (!stuckOnWall && (leftWallSlide || rightWallSlide))
+        // {
+        //     print("YYAYAYAYAYAYAYAYAYAYYAYAYAYAYAYAYYAYAYA");
+        //     movement.x = input.x;
+        // }
+        // else
+
+
+        // if(jumping)
+        // {
+
+        // }
+
+        //  if (stuckOnWall)
+        // {
+        //     print("stuck on wall x movement is 0");
+        //     movement.x = 0;
+        // }
+        // else
+        // {
+        //     float targetVelocityX = input.x * moveSpeed;
+        //     movement.x = Mathf.SmoothDamp(movement.x, targetVelocityX, ref velocityXSmoothing, grounded ? accelerationTimeGrounded : accelerationTimeAirborne);
+
+        //     print("not jumping or stuck, setting movement to " + movement.x);
+        // movement.x = input.x * moveSpeed;
+        // }
+
+
+        if (!stuckOnWall)
         {
             movement.x = input.x * moveSpeed;
+        }
+        else
+        {
+            print("stuck on wall");
         }
     }
 
     private bool IsStuckOnWall(float xInput)
     {
+        if (jumping || (!leftWallSlide && !rightWallSlide)) return false;
+
         float inputDirection = Mathf.Sign(xInput);
         float requiredPushDirection = leftWallSlide ? 1 : rightWallSlide ? -1 : 0;
 
-        if(requiredPushDirection == 0)
+        if (xInput == 0)
         {
-            // Not even wallsliding, not stuck
-            return false;
+            timeOnWall = 0;
         }
 
         if (inputDirection == requiredPushDirection)
@@ -104,6 +148,7 @@ public class Ray : MonoBehaviour
             timeOnWall = 0;
         }
 
+        print("time on wall" + timeOnWall);
         return timeOnWall < WALL_STICK_TIME;
     }
 
@@ -232,6 +277,7 @@ public class Ray : MonoBehaviour
         if (hit && !grounded && hit.distance <= rayLength)
         {
             leftWallSlide = true;
+            jumping = false;
         }
         else
         {
@@ -255,6 +301,7 @@ public class Ray : MonoBehaviour
         if (hit && !grounded && hit.distance <= rayLength)
         {
             rightWallSlide = true;
+            jumping = false;
         }
         else
         {
@@ -263,7 +310,7 @@ public class Ray : MonoBehaviour
     }
 
 
-    
+
 
 
     void SetPlayerDebugColor()
