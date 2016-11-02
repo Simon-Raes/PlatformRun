@@ -70,6 +70,8 @@ public class Ray : MonoBehaviour
 
     private void RegisterVerticalInputs()
     {
+        Vector2 input = new Vector2(Input.GetAxisRaw("Horizontal"), Input.GetAxisRaw("Vertical"));
+
         // Jump
         if (Input.GetKeyDown(KeyCode.Space) && (grounded || leftWallSlide || rightWallSlide))
         {
@@ -78,15 +80,50 @@ public class Ray : MonoBehaviour
 
             print("--------------------------jumping!!----------------------------");
 
-            if (leftWallSlide)
+
+            if (leftWallSlide || rightWallSlide)
             {
-                leftWallSlide = false;
-                movement.x = 3 * moveSpeed;
-            }
-            else if (rightWallSlide)
-            {
-                rightWallSlide = false;
-                movement.x = -3 * moveSpeed;
+                int wallDirection = leftWallSlide ? -1 : 1;
+                float inputDirection = Mathf.Sign(input.x);
+
+                float xMovement;
+                float yMovement;
+
+                if (inputDirection == input.x)
+                {
+                    // hop up
+                    xMovement = 1.5f * moveSpeed;
+                    yMovement = 15;
+                }
+                else if (input.x == 0)
+                {
+                    // hop off
+                    xMovement = 1.5f * moveSpeed;
+                    yMovement = 0;
+                }
+                else
+                {
+                    // jump faaar
+                    xMovement = 2.5f * moveSpeed;
+                    yMovement = 8;
+                }
+
+
+
+
+
+
+                if (leftWallSlide)
+                {
+                    leftWallSlide = false;
+                    movement.x = xMovement;
+                }
+                else if (rightWallSlide)
+                {
+                    rightWallSlide = false;
+                    movement.x = -xMovement;
+                }
+                movement.y = yMovement;
             }
         }
 
@@ -97,37 +134,7 @@ public class Ray : MonoBehaviour
     {
         Vector2 input = new Vector2(Input.GetAxisRaw("Horizontal"), Input.GetAxisRaw("Vertical"));
 
-        // TODO special x/y velocity when jumping off a wall
-
         bool stuckOnWall = IsStuckOnWall(input.x);
-
-        // if (!stuckOnWall && (leftWallSlide || rightWallSlide))
-        // {
-        //     print("YYAYAYAYAYAYAYAYAYAYYAYAYAYAYAYAYYAYAYA");
-        //     movement.x = input.x;
-        // }
-        // else
-
-
-        // if(jumping)
-        // {
-
-        // }
-
-        //  if (stuckOnWall)
-        // {
-        //     print("stuck on wall x movement is 0");
-        //     movement.x = 0;
-        // }
-        // else
-        // {
-        //     float targetVelocityX = input.x * moveSpeed;
-        //     movement.x = Mathf.SmoothDamp(movement.x, targetVelocityX, ref velocityXSmoothing, grounded ? accelerationTimeGrounded : accelerationTimeAirborne);
-
-        //     print("not jumping or stuck, setting movement to " + movement.x);
-        // movement.x = input.x * moveSpeed;
-        // }
-
 
         if (!stuckOnWall)
         {
@@ -187,7 +194,7 @@ public class Ray : MonoBehaviour
 
         if (leftWallSlide || rightWallSlide)
         {
-            print ("set movement to 0 because of wall slide");
+            print("set movement to 0 because of wall slide");
             movement.x = 0;
         }
     }
@@ -302,7 +309,7 @@ public class Ray : MonoBehaviour
             hit = Physics2D.Raycast(origin, Vector2.left, rayLength, collisionMask);
         }
 
-        if(movement.x > 0 && hit.distance > 0)
+        if (movement.x > 0 && hit.distance > 0)
         {
             leftWallSlide = false;
             return;
@@ -334,7 +341,7 @@ public class Ray : MonoBehaviour
             hit = Physics2D.Raycast(origin, Vector2.right, rayLength, collisionMask);
         }
 
-        if(movement.x < 0 && hit.distance > 0)
+        if (movement.x < 0 && hit.distance > 0)
         {
             rightWallSlide = false;
             return;
