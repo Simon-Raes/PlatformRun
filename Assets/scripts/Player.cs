@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-public class Ray : MonoBehaviour
+public class Player : MonoBehaviour
 {
     public LayerMask collisionMask;
 
@@ -78,7 +78,7 @@ public class Ray : MonoBehaviour
             jumping = true;
             movement.y = jumpSpeed;
 
-            print("--------------------------jumping!!----------------------------");
+            // print("--------------------------jumping!!----------------------------");
 
 
             if (leftWallSlide || rightWallSlide)
@@ -139,11 +139,11 @@ public class Ray : MonoBehaviour
         if (!stuckOnWall)
         {
             // movement.x = input.x * moveSpeed;
-            print("lerping from " + movement.x + " to " + input.x * moveSpeed);
+            // print("lerping from " + movement.x + " to " + input.x * moveSpeed);
 
             float targetVelocityX = input.x * moveSpeed;
             movement.x = Mathf.SmoothDamp(movement.x, targetVelocityX, ref velocityXSmoothing, grounded ? accelerationTimeGrounded : accelerationTimeAirborne);
-            print("result " + movement.x);
+            // print("result " + movement.x);
         }
     }
 
@@ -175,7 +175,7 @@ public class Ray : MonoBehaviour
             timeOnWall = 0;
         }
 
-        print("time on wall" + timeOnWall);
+
         return timeOnWall < WALL_STICK_TIME;
     }
 
@@ -194,7 +194,6 @@ public class Ray : MonoBehaviour
 
         if (leftWallSlide || rightWallSlide)
         {
-            print("set movement to 0 because of wall slide");
             movement.x = 0;
         }
     }
@@ -264,9 +263,8 @@ public class Ray : MonoBehaviour
 
         if (hit)
         {
-            print("--------------------------wall hit!!----------------------------");
+            // print("--------------------------wall hit!!----------------------------");
             movement.x = (hit.distance - skinWidth) * direction;
-            print("set movement to " + movement.x + " because of wall hit");
 
             jumping = false;
 
@@ -317,13 +315,11 @@ public class Ray : MonoBehaviour
 
         if (hit && !grounded && hit.distance <= rayLength)
         {
-            print("found wall slide left!");
             leftWallSlide = true;
             jumping = false;
         }
         else
         {
-            print("nah we ain't sliding left!");
             leftWallSlide = false;
         }
     }
@@ -349,13 +345,11 @@ public class Ray : MonoBehaviour
 
         if (hit && !grounded && hit.distance <= rayLength)
         {
-            print("found wall slide right!");
             rightWallSlide = true;
             jumping = false;
         }
         else
         {
-            print("nah we ain't sliding right!");
             rightWallSlide = false;
         }
     }
