@@ -1,6 +1,6 @@
-﻿using UnityEngine;
-using System.Collections;
-using System;
+﻿// using UnityEngine;
+// using System.Collections;
+// using System;
 
 public class Spike : InstakillObstacle {
     
@@ -18,6 +18,6 @@ public class Spike : InstakillObstacle {
 	protected override void CreatureKilled()
     {
         // TODO blood texture, but can't cover the entire spike thing mhhmm
-		
+
     }
 }
