@@ -25,7 +25,7 @@ public class Walker : Creature
     {
         boxCollider = GetComponent<BoxCollider2D>();
 
-        movement.x = moveSpeed * (startMovementLeft ? -1 : 0);
+        movement.x = moveSpeed * (startMovementLeft ? -1 : 1);
     }
 
 
