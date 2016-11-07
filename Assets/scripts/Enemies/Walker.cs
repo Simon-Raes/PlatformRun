@@ -45,7 +45,6 @@ public class Walker : Creature
             hitEdge = false;
         }
 
-
         AttemptMove(movement * Time.deltaTime);
     }
 
@@ -54,13 +53,13 @@ public class Walker : Creature
         UpdateRaycastOrigins();
 
         // CapAtTerminalVelocity(ref movement);
-        movement = CheckVerticalCollisions(movement);
-        movement = CheckHorizontalCollisions(movement);
+        CheckVerticalCollisions(ref movement);
+        CheckHorizontalCollisions(ref movement);
 
         transform.Translate(movement);
     }
 
-    private Vector3 CheckVerticalCollisions(Vector3 movement)
+    private void CheckVerticalCollisions(ref Vector3 movement)
     {
         float direction = Mathf.Sign(movement.y);
         float rayLength = Mathf.Abs(movement.y) + skinWidth;
@@ -85,10 +84,10 @@ public class Walker : Creature
             grounded = false;
         }
 
-        return movement;
+        // return movement;
     }
 
-    private Vector3 CheckHorizontalCollisions(Vector3 movement)
+    private void CheckHorizontalCollisions(ref Vector3 movement)
     {
         float direction = Mathf.Sign(movement.x);
         float rayLength = Mathf.Abs(movement.x) + skinWidth;
@@ -120,10 +119,6 @@ public class Walker : Creature
             RaycastHit2D hitLeft = Physics2D.Raycast(vectorLeft, Vector2.down, skinWidth * 2, collisionMask);
             RaycastHit2D hitRight = Physics2D.Raycast(vectorRight, Vector2.down, skinWidth * 2, collisionMask);
 
-            Debug.DrawRay(raycastOrigins.bottomLeft, Vector3.down, Color.blue);
-            Debug.DrawRay(vectorLeft, Vector3.down, Color.red);
-
-
             if ((hitLeft && !hitRight) || (!hitLeft && hitRight))
             {
                 if (!reversing)
@@ -138,7 +133,7 @@ public class Walker : Creature
             }
         }
 
-        return movement;
+        // return movement;
     }
 
 

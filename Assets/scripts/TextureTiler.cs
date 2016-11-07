@@ -12,7 +12,9 @@ public class TextureTiler : MonoBehaviour
 
         float xScale = transform.localScale.x;
 		float yScale = transform.localScale.y;
-        renderer.sharedMaterial.mainTextureScale = new Vector2(xScale, yScale);
+        var tempMaterial = new Material(renderer.sharedMaterial);
+        tempMaterial.mainTextureScale = new Vector2(xScale, yScale);
+        renderer.material = tempMaterial;
     }
 
     // Update is called once per frame

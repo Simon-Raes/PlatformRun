@@ -19,6 +19,7 @@ public abstract class InstakillObstacle : MonoBehaviour
 
     void OnTriggerEnter2D(Collider2D other)
     {
+        print("got " + other.gameObject);
         Creature creature = other.gameObject.GetComponent<Creature>();
         if (creature != null)
         {
