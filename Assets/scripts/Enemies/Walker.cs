@@ -1,6 +1,4 @@
 ﻿using UnityEngine;
-using System.Collections;
-using System;
 
 public class Walker : Creature
 {
@@ -136,6 +134,10 @@ public class Walker : Creature
         // return movement;
     }
 
+    public void Kill(Cause cause)
+    {
+
+    }
 
     void UpdateRaycastOrigins()
     {

@@ -1,5 +1,4 @@
 ﻿using UnityEngine;
-using System.Collections;
 
 public class Laser : MonoBehaviour
 {
@@ -23,30 +22,28 @@ public class Laser : MonoBehaviour
 
         if (ray)
         {
-            RenderLaser(ray);
-            RenderSmoke(ray);
+            DrawLaser(ray);
 
-            Player player = ray.collider.gameObject.GetComponent<Player>();
+            Creature player = ray.collider.gameObject.GetComponent<Creature>();
 
             if (player != null)
             {
-                player.die();
+                player.Kill(Cause.Laser);
             }
-
-            // if(hit player)
-            // {
-            // kill him
-            // }
+            else
+            {
+                DrawSmoke(ray);
+            }
         }
     }
 
-    private void RenderLaser(RaycastHit2D ray)
+    private void DrawLaser(RaycastHit2D ray)
     {
         lineRenderer.SetPosition(0, transform.position);
         lineRenderer.SetPosition(1, ray.point);
     }
 
-    private void RenderSmoke(RaycastHit2D ray)
+    private void DrawSmoke(RaycastHit2D ray)
     {
         if (smokeObj == null)
         {

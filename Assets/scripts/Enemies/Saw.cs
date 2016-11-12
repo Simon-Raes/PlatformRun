@@ -1,9 +1,10 @@
 ﻿using System;
 using UnityEngine;
 
-public class Saw : InstakillObstacle
+public class Saw : MonoBehaviour
 {
     public Material sawBlood;
+    private new Renderer renderer;
 
     void Start()
     {
@@ -20,8 +21,14 @@ public class Saw : InstakillObstacle
         transform.Rotate(0, 0, 6.0f * 90 * Time.deltaTime);
     }
 
-    protected override void CreatureKilled()
+    void OnTriggerEnter2D(Collider2D other)
     {
-        renderer.material = sawBlood;
+        print("got " + other.gameObject);
+        Creature creature = other.gameObject.GetComponent<Creature>();
+        if (creature != null)
+        {
+            creature.Kill(Cause.Saw);
+            renderer.material = sawBlood;
+        }
     }
 }

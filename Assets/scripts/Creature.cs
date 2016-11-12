@@ -1,5 +1,4 @@
 ﻿using UnityEngine;
-using System.Collections;
 
 public class Creature : MonoBehaviour {
 
@@ -13,7 +12,7 @@ public class Creature : MonoBehaviour {
 	
 	}
 
-	public void die(){
+	public void Kill(Cause cause){
 		print("arghgg I die");
 		GameObject.Destroy(gameObject);
 	}
