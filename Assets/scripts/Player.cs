@@ -1,25 +1,41 @@
 ﻿using UnityEngine;
+using System.Collections;
 
+
+[RequireComponent(typeof(Spawnable))]
 public class Player : Creature
 {
-    public LayerMask collisionMask;
+    [SerializeField]
+    private LayerMask collisionMask;
 
-    RaycastOrigins raycastOrigins;
-    Vector3 movement;
-    const float skinWidth = .015f;
+    // [SerializeField]
+    // private ParticleSystem smoke;
 
-    float velocityXSmoothing;
+    [SerializeField]
+    private float jumpSpeed = .1f;
+    [SerializeField]
+    private float moveSpeed = 5;
+    [SerializeField]
+    private float gravity = -20;
+    [SerializeField]
+    private float terminalVelocity = -10;
 
-    public float jumpSpeed = .1f;
-    public float moveSpeed = 5;
-    public float gravity = -20;
-    public float terminalVelocity = -10;
-    float accelerationTimeAirborne = .2f;
-    float accelerationTimeGrounded = .1f;
+    private float accelerationTimeAirborne = .2f;
+    private float accelerationTimeGrounded = .1f;
 
     private BoxCollider2D boxCollider;
     private Renderer rend;
+    private Spawnable spawnable;
 
+    private const float skinWidth = .015f;
+
+    private RaycastOrigins raycastOrigins;
+    private Vector3 movement;
+
+    private float velocityXSmoothing;
+
+    // Status
+    private bool alive = true;
     private bool grounded;
     private bool jumping;
     private bool bumpedHead;
@@ -28,10 +44,14 @@ public class Player : Creature
     private const float WALL_STICK_TIME = .25f;
     private float timeOnWall;
 
+    private ParticleSystem smoke;
+
     void Start()
     {
         boxCollider = GetComponent<BoxCollider2D>();
         rend = GetComponent<Renderer>();
+        spawnable = GetComponent<Spawnable>();
+        smoke = GetComponent<ParticleSystem>();
     }
 
     void Update()
@@ -73,7 +93,7 @@ public class Player : Creature
         Vector2 input = new Vector2(Input.GetAxisRaw("Horizontal"), Input.GetAxisRaw("Vertical"));
 
         // Jump
-        if (Input.GetKeyDown(KeyCode.Space) && (grounded || leftWallSlide || rightWallSlide))
+        if (alive && Input.GetKeyDown(KeyCode.Space) && (grounded || leftWallSlide || rightWallSlide))
         {
             jumping = true;
             movement.y = jumpSpeed;
@@ -108,11 +128,6 @@ public class Player : Creature
                     yMovement = 8;
                 }
 
-
-
-
-
-
                 if (leftWallSlide)
                 {
                     leftWallSlide = false;
@@ -138,12 +153,8 @@ public class Player : Creature
 
         if (!stuckOnWall)
         {
-            // movement.x = input.x * moveSpeed;
-            // print("lerping from " + movement.x + " to " + input.x * moveSpeed);
-
-            float targetVelocityX = input.x * moveSpeed;
+            float targetVelocityX = (alive ? input.x : 0) * moveSpeed;
             movement.x = Mathf.SmoothDamp(movement.x, targetVelocityX, ref velocityXSmoothing, grounded ? accelerationTimeGrounded : accelerationTimeAirborne);
-            // print("result " + movement.x);
         }
     }
 
@@ -355,7 +366,44 @@ public class Player : Creature
     }
 
 
+    public override void Kill(Cause cause)
+    {
+        if (!alive)
+        {
+            return;
+        }
 
+        switch (cause)
+        {
+            case Cause.Laser:
+                smoke.Play();
+                break;
+            case Cause.Saw:
+            case Cause.Spike:
+            // TODO some blood particle effect
+                break;
+        }
+
+
+        alive = false;
+
+        StartCoroutine(Respawn());
+    }
+
+    IEnumerator Respawn()
+    {
+        yield return new WaitForSeconds(1);
+
+        movement.x = 0;
+        movement.y = 0;
+
+        smoke.Stop();
+        // TODO stop the blood effect
+
+        spawnable.Spawn();
+
+        alive = true;
+    }
 
 
     void SetPlayerDebugColor()

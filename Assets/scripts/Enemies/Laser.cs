@@ -2,11 +2,15 @@
 
 public class Laser : MonoBehaviour
 {
-    public ParticleSystem smoke;
+    [SerializeField]
+    private ParticleSystem smoke;
+    [SerializeField]
+    private ParticleSystem sparks;
 
     private LineRenderer lineRenderer;
 
     private ParticleSystem smokeObj;
+    private ParticleSystem sparksObj;
 
     // Use this for initialization
     void Start()
@@ -22,7 +26,7 @@ public class Laser : MonoBehaviour
 
         if (ray)
         {
-            DrawLaser(ray);
+            DrawParticles(ray);
 
             Creature player = ray.collider.gameObject.GetComponent<Creature>();
 
@@ -43,6 +47,12 @@ public class Laser : MonoBehaviour
         lineRenderer.SetPosition(1, ray.point);
     }
 
+    private void DrawParticles(RaycastHit2D ray)
+    {
+        DrawLaser(ray);
+        DrawSparks(ray);
+    }
+
     private void DrawSmoke(RaycastHit2D ray)
     {
         if (smokeObj == null)
@@ -50,5 +60,14 @@ public class Laser : MonoBehaviour
             smokeObj = GameObject.Instantiate(smoke, transform.position, Quaternion.identity) as ParticleSystem;
         }
         smokeObj.transform.position = ray.point;
+    }
+
+    private void DrawSparks(RaycastHit2D ray)
+    {
+        if (sparksObj == null)
+        {
+            sparksObj = GameObject.Instantiate(sparks, transform.position, Quaternion.identity) as ParticleSystem;
+        }
+        sparksObj.transform.position = ray.point;
     }
 }

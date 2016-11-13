@@ -12,8 +12,10 @@ public class Creature : MonoBehaviour {
 	
 	}
 
-	public void Kill(Cause cause){
+	public virtual void Kill(Cause cause){
 		print("arghgg I die");
 		GameObject.Destroy(gameObject);
+
+		
 	}
 }
