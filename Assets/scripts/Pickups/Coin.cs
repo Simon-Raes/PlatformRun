@@ -1,15 +1,25 @@
 ﻿using UnityEngine;
-using System.Collections;
 
-public class Coin : MonoBehaviour {
+public class Coin : MonoBehaviour
+{
 
-	// Use this for initialization
-	void Start () {
-	
-	}
-	
-	// Update is called once per frame
-	void Update () {
-	
-	}
+    [SerializeField]
+    private float rotateSpeed = 50f;
+
+    void Start()
+    {
+
+    }
+
+    void Update()
+    {
+        transform.Rotate(0, rotateSpeed * Time.deltaTime, 0);
+    }
+
+    void OnTriggerEnter2D(Collider2D other)
+    {
+        GameObject.Destroy(gameObject);
+
+		// todo save this somewhere? let the player or gamemanager know about this?
+    }
 }
