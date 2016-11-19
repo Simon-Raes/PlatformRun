@@ -30,7 +30,7 @@ public class PathMover : MonoBehaviour
         float step = speed * Time.deltaTime;
         transform.position = Vector3.MoveTowards(transform.position, target, step);
 
-        if (Vector3.Distance(transform.position, target) <= .01f)
+        if (Vector3.Distance(transform.position, target) == 0)
         {
             if (movingTowards < points.Length - 1)
             {
@@ -43,6 +43,22 @@ public class PathMover : MonoBehaviour
 
             target = points[movingTowards].position;
         }
+
+		Rotate();
+    }
+
+    private void Rotate()
+    {
+        int previousIndex = movingTowards == 0 ? points.Length - 1 : movingTowards - 1;
+        Vector3 startPos = points[previousIndex].position;
+        Vector3 currentPos = gameObject.transform.position;
+
+        float distanceMoved = Vector3.Distance(startPos, currentPos);
+        float totalDistance = Vector3.Distance(startPos, target);
+
+		float percentageMoved = distanceMoved / totalDistance;
+
+		transform.rotation = Quaternion.Lerp(points[previousIndex].transform.rotation, points[movingTowards].transform.rotation, percentageMoved);
     }
 
     // Draw the Mover's path in the scene editor
