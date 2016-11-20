@@ -412,7 +412,7 @@ public class AnimatedPlayer : Creature
 
     void SetPlayerAnimation()
     {
-        print(movement.x);
+        
 
         if (Mathf.Abs(movement.x) < .1f)
         {
@@ -434,14 +434,16 @@ public class AnimatedPlayer : Creature
 
         if (leftWallSlide)
         {
+			
             animator.SetBool("wallSlideLeft", true);
         }
         else if (rightWallSlide)
         {
+			
             animator.SetBool("wallSlideRight", true);
         }
         else
-        {
+        {	
 			animator.SetBool("wallSlideLeft", false);
 			animator.SetBool("wallSlideRight", false);
 
