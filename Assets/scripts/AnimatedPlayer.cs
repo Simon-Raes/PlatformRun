@@ -7,8 +7,8 @@ public class AnimatedPlayer : Creature
     [SerializeField]
     private LayerMask collisionMask;
 
-    // [SerializeField]
-    // private ParticleSystem smoke;
+//     [SerializeField]
+//     private ParticleSystem smoke;
 
     [SerializeField]
     private float jumpSpeed = .1f;
