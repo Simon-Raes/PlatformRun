@@ -24,6 +24,8 @@ public class Laser : MonoBehaviour
     {
         RaycastHit2D ray = Physics2D.Raycast(transform.position, transform.right);
 
+        print("hit? " + ray.point);
+
         if (ray)
         {
             DrawParticles(ray);
@@ -70,4 +72,11 @@ public class Laser : MonoBehaviour
         }
         sparksObj.transform.position = ray.point;
     }
+
+
+    // public void OnDrawGizmos()
+    // {
+    //     Gizmos.color = Color.yellow;
+    //     Gizmos.DrawSphere(transform.position, 1f);
+    // }
 }

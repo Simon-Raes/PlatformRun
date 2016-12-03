@@ -4,6 +4,7 @@
 public class TurretBarrel : MonoBehaviour
 {
     [SerializeField]
+    [Tooltip("-1 to instantly snap to player, 0 to disable rotation.")]
     private float maxRotationSpeed = 20;
 
     private GameObject target;
@@ -46,7 +47,11 @@ public class TurretBarrel : MonoBehaviour
     // TODO not quite right yet, switches rotation angle around the top/0 angle, not around the current rotation
     private float adjustRotationForLimit(float currentRotation, float desiredRotation)
     {
-        if (maxRotationSpeed > 0)
+        if (maxRotationSpeed == 0)
+        {
+            return currentRotation;
+        }
+        else if (maxRotationSpeed > 0)
         {
             print(currentRotation + " vs " + desiredRotation + " und " + maxRotationSpeed * Time.deltaTime);
             if (Mathf.Abs(currentRotation - desiredRotation) > maxRotationSpeed * Time.deltaTime)

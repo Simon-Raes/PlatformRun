@@ -1,11 +1,13 @@
 ﻿using UnityEngine;
 using System.Collections;
 
+/*
+* Shoots out a raycast straight ahead, shoots bullet when a player passed through it. 
+*/
+
+
 public class TurretGun : MonoBehaviour
 {
-
-    [SerializeField]
-    private Transform bulletSpawnPoint;
     [SerializeField]
     private float fireRate = 1;
     [SerializeField]
@@ -20,10 +22,6 @@ public class TurretGun : MonoBehaviour
 
 
 
-    // private GameObject target;
-
-
-
     // Use this for initialization
     void Start()
     {
@@ -33,11 +31,7 @@ public class TurretGun : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-		// TODO figure out why this ray always hits the barrel
-		// debug ray looks fine and should be the same, no?
-        RaycastHit2D ray = Physics2D.Raycast(transform.position + transform.up * 3, transform.up, range);
-		
-		Debug.DrawRay(transform.position + transform.up * 3, transform.up * 20, Color.red, 1f);
+        RaycastHit2D ray = Physics2D.Raycast(transform.position, transform.up, 20);
 
         if (ray)
         {
@@ -49,18 +43,15 @@ public class TurretGun : MonoBehaviour
                 if (timeSinceLastShot > fireRate)
                 {
                     timeSinceLastShot = 0;
-                    Bullet newBullet = GameObject.Instantiate(bullet, bulletSpawnPoint.transform.position, Quaternion.identity) as Bullet;
+                    Bullet newBullet = GameObject.Instantiate(bullet, transform.position, Quaternion.identity) as Bullet;
 
                     Vector3 bulletDirection = transform.up;
                     bulletDirection *= bulletSpeed;
                     newBullet.SetDirection(bulletDirection);
                 }
-                else
-                {
-                    timeSinceLastShot += Time.deltaTime;
-                }
             }
         }
+		timeSinceLastShot += Time.deltaTime;
     }
 
 }
